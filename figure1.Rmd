@@ -1,0 +1,79 @@
+---
+title: "figure1"
+author: "Cam Reimer"
+date: "2/4/2023"
+output: html_document
+---
+
+```{r}
+#Set working directory 
+setwd("C:/Users/camer/OneDrive/Documents/SPH/PRESTO")
+
+library(ggplot2)
+#library(haven)
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+
+load("data/data_processed.RData")
+```
+
+```{r lm functions}
+# functions to do analysis and organize output 
+lmfun<-function(data,y,buffer,x, xname){
+  # format function call 
+  xname = paste(c(paste0(xname,as.character(buffer), "_amax_iqr"),x) , collapse = " + ")
+  formula1<-as.formula(paste(y,"~",xname))
+  lm.fit<-do.call("lm",list(data=quote(data),formula1))
+  return(lm.fit)
+}
+
+lmfull<-function(data, y, buffers, x, sig_figs = 3, xname){
+  # run models and store as output
+  model = vector(mode="list")
+  for(i in 1:length(buffers)){
+    model[[i]] = lmfun(data = data, y = y, buffer = buffers[i], x = x, xname=xname)
+  }
+  # format and store summary output
+  #results = data.frame(matrix(data = NA, nrow = 1, ncol = length(buffers)))
+  results = data.frame(matrix(data = NA, nrow = length(buffers), ncol = 3))
+  for(i in 1:length(buffers)){
+    main <- as.data.frame(cbind(coef(model[[i]]), confint(model[[i]])))[-1,]
+    main <- round(main, sig_figs)
+    results[i,] = main[1,]
+    #results[,i]<-paste0(main$V1[1]," (", main$`2.5 %`[1], ", ", main$`97.5 %`[1], ")")
+    #colnames(results)[i] = paste0("NDVI IQR ", buffers[i], "m")
+  }
+  #rownames(results) = c("ndvi")
+  return(list(model = model, results = results))
+}
+```
+
+```{r}
+x = c("ageatqstn", "b_race_ethnic_census", "b_educ", "b_income", "ct_lths")
+buffers = c(50, 100, 250, 500)
+xname = "ndvi_"
+outcome = "pss_score"
+outcome = "b_mdi_score"
+
+#Full
+model3_SES1 <- lmfull(data = NSES1, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES2 <- lmfull(data = NSES2, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES3 <- lmfull(data = NSES3, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+
+#Urban
+model3_SES1_urban <- lmfull(data = NSES1_urban, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES2_urban <- lmfull(data = NSES2_urban, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES3_urban <- lmfull(data = NSES3_urban, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+
+#Rural
+model3_SES1_rural <- lmfull(data = NSES1_rural, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES2_rural <- lmfull(data = NSES2_rural, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+model3_SES3_rural <- lmfull(data = NSES3_rural, y = outcome, buffers = buffers, x = x[1:5], sig_figs = 3, xname = xname)
+
+#Bind results into rows
+figure1 = rbind(model3_SES1$results, model3_SES2$results, model3_SES3$results, model3_SES1_urban$results, model3_SES2_urban$results, model3_SES3_urban$results, model3_SES1_rural$results, model3_SES2_rural$results, model3_SES3_rural$results )
+
+rm(model3_SES1, model3_SES2, model3_SES3, model3_SES1_urban, model3_SES2_urban, model3_SES3_urban, model3_SES1_rural, model3_SES2_rural, model3_SES3_rural, urban, rural)
+```
