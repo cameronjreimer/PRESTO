@@ -12,8 +12,8 @@ library(tidyr)
 library(mgcv)
 library(kableExtra)
 
-
-load("data/data_processed.RData")
+#setwd("C:/Users/camer/OneDrive/Documents/SPH/PRESTO")
+load("C:/Users/camer/OneDrive/Documents/SPH/PRESTO/data/data_processed.RData")
 ```
 
 ```{r lm functions}
