@@ -37,5 +37,6 @@ lmfull<-function(data, y, buffers, x, sig_figs = 3, ndvi_measure){
     main <- round(main, sig_figs)
     results[i,] = main[1,]
   }
+  colnames(results) <- c("Mean", "Lower_CI", "Upper_CI")
   return(list(model = model, results = results))
 }
