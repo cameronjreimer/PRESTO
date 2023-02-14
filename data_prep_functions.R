@@ -101,14 +101,14 @@ add_ndvi <- function(data, id_colname = "StudyID", date_colname = "b_finisheddat
 add_urban_cat <- function(data){
   data$ct_urban_cat = NA
   for(i in 1:dim(data)[1]){
-    if(data$Country[i] == "US"){
-      data$ct_urban_cat[i] = as.numeric(data$ct_urban[i] >= 90)
-    }
-    if(data$Country[i] == "Canada"){
-      data$ct_urban_cat[i] = data$ct_urban[i]
-    }
     if(is.na(data$ct_urban[i])){ 
       data$ct_urban[i] = NA
+    }else if(data$Country[i] == "US"){
+      data$ct_urban_cat[i] = as.numeric(data$ct_urban[i] >= 90)
+    }else if(data$Country[i] == "Canada" & data$ct_urban[i] > 1){
+      data$ct_urban_cat[i] = 1
+    }else if(data$Country[i] == "Canada"){
+      data$ct_urban_cat[i] = data$ct_urban[i]
     }
   }
   return(data)
@@ -131,9 +131,10 @@ get_ndvi_iqr_quartiles <- function(data){
   }
   for(i in 1:length(ndvi_colnames)){
     q <- quantile(data[,ndvi_colnames[i]], probs = c(0, 0.25, 0.5, 0.75, 1), names = TRUE, na.rm=TRUE)
-    data[paste0(ndvi_colnames[i], "_quantile")] <- case_when(data[,ndvi_colnames[i]] <= q[1] ~ "1",
-                                                             data[,ndvi_colnames[i]] <= q[2] ~ "2",
-                                                             data[,ndvi_colnames[i]] <= q[3] ~ "3",
+    #rewrite 
+    data[paste0(ndvi_colnames[i], "_quantile")] <- case_when(as.logical(data[,ndvi_colnames[i]] <= q[2]) ~ "1",
+                                                             as.logical(data[,ndvi_colnames[i]] <= q[3]) ~ "2",
+                                                             as.logical(data[,ndvi_colnames[i]] <= q[4]) ~ "3",
                                                              TRUE ~ "4")
   }
   return(data)
