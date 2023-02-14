@@ -9,15 +9,15 @@ output: html_document
 #navigate to directory 
 setwd("C:/Users/camer/OneDrive/Documents/SPH/PRESTO")
 #load in packages 
-library(tableone)
-library(haven)
 library(tidyverse)
 library(lubridate)
 library(dplyr)
 library(labelled)
 library(tidyr)
+library (sas7bdat)
+library(haven)
 #load in functions
-source("data_prep_functions.R")
+source("~/R/PRESTO/data_prep_functions.R")
 #load in data
 data_full <- read_sas("ndvi_mental_001.sas7bdat")
 ```
@@ -30,7 +30,7 @@ buffers <- c(50,100,250,500)
 data = data_full[c("StudyID", "Country", "ageatqstn", "b_race_ethnic_census", "b_educ", "b_income", "ct_HHinc", "ct_lths", "ct_urban", "pss_score", "b_mdi_score",  "b_finisheddate", generate_all_ndvi_colnames(years,buffers))]
 rm(data_full)
 
-#get NDVI 
+#get NDVI - This may take a while
 data <- add_ndvi(data, id_colname = "StudyID", date_colname = "b_finisheddate", buffers=buffers)
 
 #categorize ct_urban
@@ -48,7 +48,7 @@ missing_counts <- append(missing_counts, dim(data)[1] - dim(data_final)[1])
 miss <- as.matrix(missing_counts)
 colnames(miss) <- "count"
 rownames(miss)[c(dim(miss)[1]-1,dim(miss)[1])] <- c("All NDVI", "Total")
-miss
+#miss
 rm(data)
 ```
 
@@ -88,7 +88,7 @@ rm(data_final)
 ```
 
 ```{r Export data}
-save(data, urban, rural, NSES1, NSES2, NSES3, NSES1_urban, NSES2_urban, NSES3_urban, NSES1_rural, NSES2_rural, NSES3_rural, file = "data/data_processed.RData")
+save(data, urban, rural, NSES1, NSES2, NSES3, NSES1_urban, NSES2_urban, NSES3_urban, NSES1_rural, NSES2_rural, NSES3_rural, file = "C:/Users/camer/OneDrive/Documents/SPH/PRESTO/data/data_processed.RData")
 #write_csv(data_final, "C:/Users/camer/OneDrive/Documents/SPH/PRESTO/data/data_processed.csv")
 ```
 
