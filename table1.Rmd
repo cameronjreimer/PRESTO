@@ -16,7 +16,6 @@ library(labelled)
 load("C:/Users/camer/OneDrive/Documents/SPH/PRESTO/data/data_processed.RData")
 ```
 
-
 ```{r}
 # Rename Factors
 data$race_ethnic_factors = as.factor(data$b_race_ethnic_census)
@@ -50,9 +49,11 @@ buffer <- "100"
 ndvi_measure <- "amax"
 quantiles <- paste0("ndvi_", buffer, "_", ndvi_measure, "_iqr_quantile")
 
+#Stratified by greenness quartiles 
 tab1_100 <- CreateTableOne(vars = myVars, strata = quantiles, data = data, factorVars = catVars, test = FALSE)
 print(tab1_100, formatOptions = list(big.mark = ","), varLabels = TRUE, dropEqual = TRUE)
 
+#full sample stats
 tab1_100_overall <- CreateTableOne(vars = myVars , data = data, factorVars = catVars, test = FALSE)
 print(tab1_100_overall, formatOptions = list(big.mark = ","), varLabels = TRUE, dropEqual = TRUE)
 ```
@@ -66,18 +67,3 @@ table1t <- print(tab1_100_overall, exact = "stage", quote = FALSE, noSpaces = TR
 write.csv(table1t, file="C:/Users/camer/OneDrive/Documents/SPH/PRESTO/table1_overall.csv")
 ```
 
-
-
-
-
-
-
-
-
-
-
-```{r}
-#export version 2
-table1t <- print(tab1_100, exact = "stage", quote = FALSE, noSpaces = TRUE, printToggle = FALSE, varLabels = TRUE, dropEqual = TRUE)
-write.csv(table1t, file="C:/Users/camer/OneDrive/Documents/SPH/PRESTO/table1.csv")
-```
