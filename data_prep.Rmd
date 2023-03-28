@@ -43,13 +43,14 @@ data_final = na.omit(data)
 
 #check counts of missing data 
 missing_counts <- colMeans(is.na(data)) * dim(data)[1]
+missing_counts <- append(missing_counts, dim(data)[1] - dim(na.omit(data[,c('pss_score', 'b_mdi_score')]))[1])
 missing_counts <- append(missing_counts, dim(data)[1] - dim(na.omit(data[,grep("ndvi", names(data))]))[1])
 missing_counts <- append(missing_counts, dim(data)[1] - dim(data_final)[1])
 miss <- as.matrix(missing_counts)
 colnames(miss) <- "count"
-rownames(miss)[c(dim(miss)[1]-1,dim(miss)[1])] <- c("All NDVI", "Total")
-#miss
-rm(data)
+rownames(miss)[c(dim(miss)[1]-1,dim(miss)[1])] <- c( "All NDVI", "Total")
+miss
+#rm(data)
 ```
 
 ```{r Get quantiles and assign factors}
