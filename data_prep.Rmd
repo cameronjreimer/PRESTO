@@ -37,6 +37,19 @@ data <- add_ndvi(data, id_colname = "StudyID", date_colname = "b_finisheddate", 
 data <- add_urban_cat(data)
 ```
 
+```{r Check for missingness sequentially}
+#confounding variables 
+miss1 <- subset(data, !is.na(data$StudyID) & !is.na(data$Country) & !is.na(data$ageatqstn) & !is.na(data$b_race_ethnic_census) & !is.na(data$b_educ) & !is.na(data$b_income) & !is.na(data$ct_HHinc) & !is.na(data$ct_lths) & !is.na(data$ct_urban)) 
+paste(dim(data)[1] - dim(miss1)[1], "participants missing data on confounding variables")
+
+#outcomes 
+miss2 <- subset(miss1, !is.na(miss1$pss_score) & !is.na(miss1$b_mdi_score))
+paste(dim(miss1)[1] - dim(miss2)[1], "participants missing data on outcome measures")
+
+#greenness 
+paste(dim(miss2)[1] - dim(na.omit(miss2[,grep("ndvi", names(data))]))[1], "participants missing greenness data")
+```
+
 ```{r Check for missingness}
 #remove missing data 
 data_final = na.omit(data)
