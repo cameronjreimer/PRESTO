@@ -73,7 +73,7 @@ rownames(miss)[c(dim(miss)[1]-1,dim(miss)[1])] <- c( "All NDVI", "Total")
 #Create Quantiles of NDVI IQR
 #data_final <- get_ndvi_iqr_quartiles(data_final)
 
-data_final <- process_ndvi(data_final, outpath = 'breaks.csv')
+data_final <- process_ndvi(data_final, outpath = 'C:/Users/camer/OneDrive/Documents/SPH/PRESTO/breaks.csv')
 
 #Create Quantiles for NSES
 data_final <- data_final %>%
