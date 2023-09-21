@@ -115,27 +115,52 @@ add_urban_cat <- function(data){
 }
 
 #Compute IQR for all NDVI measures 
-get_ndvi_iqr <- function(data){
-  ndvi_colnames <- names(data)[grep("ndvi", names(data))]
-  for(i in 1:length(ndvi_colnames)){
-    data[paste0(ndvi_colnames[i],"_iqr")] <- data[ndvi_colnames[i]] / IQR(unlist(data[ndvi_colnames[i]]), na.rm = TRUE)
-  }
-  return(data)
-}
-
-#Create Quartiles of NDVI IQR for all measures 
-get_ndvi_iqr_quartiles <- function(data){
-  ndvi_colnames <- names(data)[grep("iqr", names(data))]
+process_ndvi <- function(data, outpath){
   if(!is.data.frame(data) || !all(colnames(data) != "")){
     stop("Input must be a data frame with named columns")
   }
+  
+  ndvi_colnames <- names(data)[grep("ndvi", names(data))]
+  
+  breaks <- data.frame()
+  
   for(i in 1:length(ndvi_colnames)){
-    q <- quantile(data[,ndvi_colnames[i]], probs = c(0, 0.25, 0.5, 0.75, 1), names = TRUE, na.rm=TRUE)
-    #rewrite 
+    # NDVI quantiles
+    q <- quantile(data[ndvi_colnames[i]], probs = c(0, 0.25, 0.5, 0.75, 1), names = TRUE, na.rm=TRUE)
     data[paste0(ndvi_colnames[i], "_quantile")] <- case_when(as.logical(data[,ndvi_colnames[i]] <= q[2]) ~ "1",
                                                              as.logical(data[,ndvi_colnames[i]] <= q[3]) ~ "2",
                                                              as.logical(data[,ndvi_colnames[i]] <= q[4]) ~ "3",
                                                              TRUE ~ "4")
+    # NDVI IQR
+    data[paste0(ndvi_colnames[i],"_iqr")] <- data[ndvi_colnames[i]] / IQR(unlist(data[ndvi_colnames[i]]), na.rm = TRUE)
+    
+    # IQR quantiles
+    q_iqr <- quantile(data[paste0(ndvi_colnames[i],"_iqr")], probs = c(0, 0.25, 0.5, 0.75, 1), names = TRUE, na.rm=TRUE)
+    data[paste0(ndvi_colnames[i], "_iqr_quantile")] <- case_when(as.logical(data[paste0(ndvi_colnames[i],"_iqr")] <= q_iqr[2]) ~ "1",
+                                                             as.logical(data[paste0(ndvi_colnames[i],"_iqr")] <= q_iqr[3]) ~ "2",
+                                                             as.logical(data[paste0(ndvi_colnames[i],"_iqr")] <= q_iqr[4]) ~ "3",
+                                                             TRUE ~ "4")
+    # save quantile ranges 
+    breaks <- rbind(breaks, as.data.frame(t(c(ndvi_colnames[i], q))))
+    breaks <- rbind(breaks, as.data.frame(t(c(paste0(ndvi_colnames[i],"_iqr"), q_iqr))))
   }
+  write.csv(breaks, outpath)
   return(data)
 }
+
+#Create Quartiles of NDVI IQR for all measures 
+# get_ndvi_iqr_quartiles <- function(data){
+#   ndvi_colnames <- names(data)[grep("iqr", names(data))]
+#   if(!is.data.frame(data) || !all(colnames(data) != "")){
+#     stop("Input must be a data frame with named columns")
+#   }
+#   for(i in 1:length(ndvi_colnames)){
+#     q <- quantile(data[,ndvi_colnames[i]], probs = c(0, 0.25, 0.5, 0.75, 1), names = TRUE, na.rm=TRUE)
+#     #rewrite 
+#     data[paste0(ndvi_colnames[i], "_quantile")] <- case_when(as.logical(data[,ndvi_colnames[i]] <= q[2]) ~ "1",
+#                                                              as.logical(data[,ndvi_colnames[i]] <= q[3]) ~ "2",
+#                                                              as.logical(data[,ndvi_colnames[i]] <= q[4]) ~ "3",
+#                                                              TRUE ~ "4")
+#   }
+#   return(data)
+# }
